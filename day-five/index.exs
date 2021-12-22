@@ -2,19 +2,18 @@
 # - gain comfort with debugging techniques in Elixir
 # - use the Pipe operator to mahe data transforms more obvious
 # - use the Stream functions to optimize resource usage on transforms
+# - use imports to make the file reading code shared between my solutions. let it accept a dynamic parsing function
 
 # likely goals for next one -
 # - utilize typedoc typechecks
 # - utilize a unit test library
 
 
-defmodule AdventDayFour do
+defmodule AdventDayFive do
   def solution do
-    {call_order, bingo_cards} = get_data("day-four/squid_bingo.txt")
-
-    call_the_numbers(call_order, bingo_cards, [], nil)
+    # get_data("day-five/input-data.txt")
+    IO.puts "Day Five"
   end
-
 
   defp get_data(filename) do
     {:ok, cwd} = File.cwd()
@@ -30,4 +29,4 @@ defmodule AdventDayFour do
   end
 end
 
-AdventDayFour.solution()
+AdventDayFive.solution()
