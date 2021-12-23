@@ -1,4 +1,4 @@
-FROM elixir:latest
+FROM advent-elixir
 
 CMD echo "Test - we're in!"
 WORKDIR elixir-app
@@ -6,5 +6,5 @@ WORKDIR elixir-app
 COPY . .
 # docker run -it elixir-env-1 iex
 
-CMD ["elixir", "day-five/index.exs"]
+CMD ["elixir", "day-four/index.exs"]
 

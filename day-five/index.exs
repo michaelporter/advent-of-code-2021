@@ -12,7 +12,7 @@
 defmodule AdventDayFive do
   def solution do
     # get_data("day-five/input-data.txt")
-    IO.puts "Day Five"
+    IO.puts "Day Five on plane!"
   end
 
   defp get_data(filename) do

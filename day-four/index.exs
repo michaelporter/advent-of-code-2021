@@ -2,29 +2,30 @@
 
 defmodule AdventDayFour do
   def solution do
-    {call_order, bingo_cards} = get_data("day-four/squid_bingo.txt")
+    {call_order, bingo_cards} = get_data("day-four/squid_bingo_small.txt")
 
     call_the_numbers(call_order, bingo_cards, [], nil)
   end
 
   defp announce_winner(winning_card, final_number) do
-    summed = Enum.sum(
-      Enum.map(
-        winning_card,
-        fn row ->
-          Enum.reduce(
-            Enum.filter(row, fn cell ->
-              case cell do
-                { _n, :uncalled } -> true
-                _ -> false
-              end
-            end),
-            0,
-            fn ({num, _status}, acc)->
-              num + acc
-            end
-          )
-        end))
+
+    get_uncalled_cells = fn cell ->
+      case cell do
+        { _n, :uncalled } -> true
+        _ -> false
+      end
+    end
+
+    bonkers_function = fn row ->
+      row 
+        |> Enum.filter(get_uncalled_cells) 
+        |> Enum.map(&(Tuple.to_list(&1) |> Enum.at(0))) 
+        |> Enum.sum
+    end
+
+    summed = winning_card |> Enum.map(bonkers_function) |> Enum.sum
+
+    IO.puts inspect(summed)
 
     IO.puts "Final #{summed} x #{final_number} = #{summed * final_number}"
     winning_card
@@ -61,44 +62,40 @@ defmodule AdventDayFour do
   end
 
   defp check_and_update_card(called_number, card) do
-    Enum.map(
-      card,
-      fn row ->
-        Enum.map(row, fn {num, state} ->
-          case {num, state} do
-            {^called_number, :uncalled} ->
-              {num, :called}
-            _ ->
-              {num, state}
-          end
-        end)
+    iterate_cells = fn {num, state} ->
+      case {num, state} do
+        {^called_number, :uncalled} ->
+          {num, :called}
+        _ ->
+          {num, state}
       end
-    )
+    end
+
+    iterate_rows = &(Enum.map(&1, iterate_cells))
+
+    Enum.map(card, iterate_rows)
   end
 
   defp is_winner?(card, _called_numbers) do
-    row_winner = Enum.find(
-      card, # [[{}], [], []]
-      fn row ->
-        length(Enum.filter(row, fn cell ->
-          case cell do
-            {_n, :uncalled} -> false
-            {_n, :called} -> true
-          end
-        end))== length(row)
+    winning_cells = fn cell ->
+      case cell do
+        {_n, :uncalled} -> false
+        {_n, :called} -> true
       end
-    )
+    end
 
-    column_winner = Enum.find(
-      Enum.zip(card),
-      fn col ->
-        length(Enum.filter(Tuple.to_list(col), fn cell ->
-          case cell do
-            {_n, :uncalled} -> false
-            {_n, :called} -> true
-          end
-        end)) == tuple_size(col)
-      end)
+    winning_row = fn row ->
+      winning_cells_count = row |> Enum.filter(winning_cells) |> length 
+      winning_cells_count == row |> length
+    end
+
+    winning_column = fn col ->
+      winning_cells_count =  col |> Tuple.to_list |> Enum.filter(winning_cells) |> length
+      winning_cells_count == col |> Tuple.to_list |> length
+    end
+
+    row_winner    = card |> Enum.find(winning_row)
+    column_winner = card |> Enum.zip |> Enum.find(winning_column)
 
     row_winner || column_winner
   end
@@ -113,10 +110,12 @@ defmodule AdventDayFour do
   end
 
   defp parse_data(body) do
-    [called_numbers | card_data] = String.split(body, ~r/\n\r/, trim: true) # keep the data as strings
+    [called_numbers | card_data] = String.split(body, ~r/\n\n/, trim: true) # keep the data as strings
 
     {
-      Enum.map(String.split(called_numbers, ~r/,|\r|\n/, trim: true), fn n -> String.to_integer(n) end),
+      called_numbers 
+        |> String.split(~r/,|\r|\n/, trim: true) 
+        |> Enum.map(&(String.to_integer(&1))),
       parse_bingo_cards(card_data)
     }
   end
@@ -128,17 +127,14 @@ defmodule AdventDayFour do
   end
 
   defp parse_bingo_cards([card|remaining_cards], cards) do
-    rows = String.split card, ~r/\r|\n/, trim: true
-
-    new_card = Enum.map(
-      rows,
-      fn row ->
-        Enum.map(
-          String.split(row, ~r/\s+/, trim: true),
-          fn i -> {String.to_integer(i), :uncalled} end
-        )
-      end
+    map_cell_data = &({String.to_integer(&1), :uncalled})
+    parse_row = &(
+      &1 
+        |> String.split(~r/\s+/, trim: true) 
+        |> Enum.map(map_cell_data)
     )
+
+    new_card = String.split(card, ~r/\n/, trim: true) |> Enum.map(parse_row)
 
     parse_bingo_cards(remaining_cards, [new_card | cards])
   end
