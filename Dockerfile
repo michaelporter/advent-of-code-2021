@@ -1,4 +1,4 @@
-FROM advent-elixir
+FROM elixir:latest
 
 CMD echo "Test - we're in!"
 WORKDIR elixir-app

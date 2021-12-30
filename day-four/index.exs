@@ -2,7 +2,7 @@
 
 defmodule AdventDayFour do
   def solution do
-    {call_order, bingo_cards} = get_data("day-four/squid_bingo_small.txt")
+    {call_order, bingo_cards} = get_data("day-four/squid_bingo.txt")
 
     call_the_numbers(call_order, bingo_cards, [], nil)
   end
@@ -17,9 +17,9 @@ defmodule AdventDayFour do
     end
 
     bonkers_function = fn row ->
-      row 
-        |> Enum.filter(get_uncalled_cells) 
-        |> Enum.map(&(Tuple.to_list(&1) |> Enum.at(0))) 
+      row
+        |> Enum.filter(get_uncalled_cells)
+        |> Enum.map(&(Tuple.to_list(&1) |> Enum.at(0)))
         |> Enum.sum
     end
 
@@ -85,7 +85,7 @@ defmodule AdventDayFour do
     end
 
     winning_row = fn row ->
-      winning_cells_count = row |> Enum.filter(winning_cells) |> length 
+      winning_cells_count = row |> Enum.filter(winning_cells) |> length
       winning_cells_count == row |> length
     end
 
@@ -110,11 +110,10 @@ defmodule AdventDayFour do
   end
 
   defp parse_data(body) do
-    [called_numbers | card_data] = String.split(body, ~r/\n\n/, trim: true) # keep the data as strings
-
+    [called_numbers | card_data] = String.split(body, ~r/\n\r/, trim: true) # keep the data as strings
     {
-      called_numbers 
-        |> String.split(~r/,|\r|\n/, trim: true) 
+      called_numbers
+        |> String.split(~r/,|\r|\n/, trim: true)
         |> Enum.map(&(String.to_integer(&1))),
       parse_bingo_cards(card_data)
     }
@@ -129,8 +128,8 @@ defmodule AdventDayFour do
   defp parse_bingo_cards([card|remaining_cards], cards) do
     map_cell_data = &({String.to_integer(&1), :uncalled})
     parse_row = &(
-      &1 
-        |> String.split(~r/\s+/, trim: true) 
+      &1
+        |> String.split(~r/\s+/, trim: true)
         |> Enum.map(map_cell_data)
     )
 
